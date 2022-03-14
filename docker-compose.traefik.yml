@@ -13,7 +13,7 @@ services:
       # Enable Traefik for this service, to make it available in the public network
       - traefik.enable=true
       # Define the port inside of the Docker service to use
-      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8000
       # Make Traefik use this domain in HTTP
       - traefik.http.routers.traefik-dashboard-http.entrypoints=http
       - traefik.http.routers.traefik-dashboard-http.rule=Host(`traefik.lib.thiere18.studio`)
