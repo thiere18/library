@@ -146,8 +146,7 @@ def user_token_headers(
     r = client.post("/api/token", data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]
-    headers = {"Authorization": f"Bearer {a_token}"}
-    return headers
+    return {"Authorization": f"Bearer {a_token}"}
 
 
 @pytest.fixture
@@ -163,5 +162,4 @@ def superuser_token_headers(
     r = client.post("/api/token", data=login_data)
     tokens = r.json()
     a_token = tokens["access_token"]
-    headers = {"Authorization": f"Bearer {a_token}"}
-    return headers
+    return {"Authorization": f"Bearer {a_token}"}
