@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from sqlalchemy.dialects.postgresql import ENUM
 
 from .session import Base
 
@@ -22,8 +21,3 @@ class User(Base):
     updated_at = Column(
         TIMESTAMP(timezone=False), server_default=text("now()"), onupdate=text("now()")
     )  # noqa
-    role = Column(
-        ENUM("ADMIN", "NORMAL", "RESTRICTED", name="role_status"),
-        default="NORMAL",
-        nullable=False,
-    )

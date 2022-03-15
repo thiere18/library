@@ -16,7 +16,6 @@ def init() -> None:
                 password="password",
                 is_active=True,
                 is_superuser=True,
-                role="ADMIN",
             ),
         )
         print("Creating superuser admin@curascuras.com")

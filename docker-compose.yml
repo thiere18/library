@@ -1,5 +1,6 @@
 version: '3.7'
 services:
+
   postgres:
     image: postgres:12
     restart: always
@@ -16,43 +17,17 @@ services:
       dockerfile: Dockerfile
     command: python app/main.py
     tty: true
+    ports:
+      - 8000:8000
     volumes:
       - ./backend:/app/:cached
       - ./.docker/.ipython:/root/.ipython:cached
-    labels:
-      # enable Traefik for this specific "backend" service
-      - traefik.enable=true
-      # define the port inside of the docker service to use
-      - traefik.http.services.app.loadbalancer.server.port=80
-      # make Traefik use this domain in HTTP
-      - traefik.http.routers.app-http.entrypoints=http
-      - traefik.http.routers.app-http.rule=HOST(`api.lib.thiere18.studio`)
-      # use the traefik-public- network (declared below)
-      - traefik.docker.network=traefik.public
-      # Make Traefik us this domain in HTTPS
-      - traefik.http.routers.app-https.entrypoints=https
-      - traefik.http.routers.app-https.rule=Host(`api.lib.thiere18.studio`)
-      - traefik.http.routers.app-https.tls=true
-      # use the "le" (Let's encrypt) resolver
-      - traefik.http.routers.app-https.tls.certresolver=le
-      # Https-redirect middleware to redirect HTTP to HTTPS
-      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
-      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
-      # Middleware to redirect HTTP to HTTPS
-      - traefik.http.routers.app-http.middlewares=https-redirect
-    networks:
-      # use the public network created to be shared between Traefik
-      # any other service that needs to be publicly available
-      - traefik-public
     environment:
       PYTHONPATH: .
       DATABASE_URL: 'postgresql://postgres:password@postgres:5432/postgres'
     depends_on:
       - postgres
 
+
 volumes:
   db-data:
-
-networks:
-  traefik-public:
-    external: true

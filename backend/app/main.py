@@ -9,7 +9,9 @@ from app.db.session import SessionLocal
 from app.core.auth import get_current_active_user
 
 
-app = FastAPI(title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api")
+app = FastAPI(
+    title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api/openapi.json"
+)
 
 
 @app.middleware("http")
@@ -23,6 +25,13 @@ async def db_session_middleware(request: Request, call_next):
 @app.get("/api/v1")
 async def root():
     return {"message": "Hello World"}
+
+
+@app.get("/")
+async def rocks():
+    return {
+        "message": "Hello world! From FastAPI running on Uvicorn with Gunicorn. Using Python 3.8"
+    }
 
 
 # Routers

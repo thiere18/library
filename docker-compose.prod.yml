@@ -1,43 +1,64 @@
+
+  # backend:
+  #   image: ghcr.io/sigularusrex/cura:latest
+  #   command: python app/main.py
+  #   tty: true
+  #   ports:
+  #     - 8000:8000
+
 version: '3.7'
 services:
-  redis:
-    image: redis
-    ports:
-      - 6379:6379
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
+  postgres:
+    image: postgres:12
+    restart: always
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@example.com
-      - PGADMIN_DEFAULT_PASSWORD=password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
-      - 5050:80
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data:cached
+  backend:
+    image: thiere18/library:latest
+    command: python app/main.py
+    tty: true
+    volumes:
+      - ./backend:/app/:cached
+      - ./.docker/.ipython:/root/.ipython:cached
+    labels:
+      # enable Traefik for this specific "backend" service
+      - traefik.enable=true
+      # define the port inside of the docker service to use
+      - traefik.http.services.app.loadbalancer.server.port=80
+      # make Traefik use this domain in HTTP
+      - traefik.http.routers.app-http.entrypoints=http
+      - traefik.http.routers.app-http.rule=HOST(`api.elapiz.io`)
+      # use the traefik-public- network (declared below)
+      - traefik.docker.network=traefik.public
+      # Make Traefik us this domain in HTTPS
+      - traefik.http.routers.app-https.entrypoints=https
+      - traefik.http.routers.app-https.rule=Host(`api.elapiz.io`)
+      - traefik.http.routers.app-https.tls=true
+      # use the "le" (Let's encrypt) resolver
+      - traefik.http.routers.app-https.tls.certresolver=le
+      # Https-redirect middleware to redirect HTTP to HTTPS
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      # Middleware to redirect HTTP to HTTPS
+      - traefik.http.routers.app-http.middlewares=https-redirect
+    networks:
+      # use the public network created to be shared between Traefik
+      # any other service that needs to be publicly available
+      - traefik-public
+    environment:
+      PYTHONPATH: .
+      DATABASE_URL: 'postgresql://postgres:password@postgres:5432/postgres'
     depends_on:
       - postgres
 
-  celery_worker:
-    image: ghcr.io/sigularusrex/cura:latest
-    command: celery --app app.tasks worker --loglevel=DEBUG -Q main-queue -c 1
-    depends_on:
-      - backend
-      - redis
+volumes:
+  db-data:
 
-  flower:  
-    image: mher/flower
-    command: celery --broker=redis://redis:6379/0 flower --port=5555
-
-    ports:  
-        - 5555:5555
-    depends_on:
-      - backend
-      - redis
-      - celery_worker
-  backend:
-    image: ghcr.io/sigularusrex/cura:latest
-    command: python app/main.py
-    tty: true
-    ports:
-      - 8000:8000
-    environment:
-      PYTHONPATH: .
-      DATABASE_URL: 'postgresql://curas_admin@curass:tlo4413!E@curass.postgres.database.azure.com:5432/cura'
+networks:
+  traefik-public:
+    external: true

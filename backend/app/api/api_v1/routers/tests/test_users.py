@@ -9,7 +9,6 @@ def test_get_users(client, test_superuser, superuser_token_headers):
             "email": test_superuser.email,
             "is_active": test_superuser.is_active,
             "is_superuser": test_superuser.is_superuser,
-            "role": test_superuser.role,
             "id": test_superuser.id,
             # "created_at": test_superuser.created_at,
             # "updated_at": test_superuser.updated_at
@@ -74,7 +73,6 @@ def test_get_user(
         "email": test_user.email,
         "is_active": bool(test_user.is_active),
         "is_superuser": test_user.is_superuser,
-        "role": test_user.role,
         "id": test_user.id,
         # "created_at": test_user.created_at,
         # "updated_at": test_user.updated_at,

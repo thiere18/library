@@ -8,7 +8,6 @@ class UserBase(BaseModel):
     is_superuser: bool = False
     first_name: str = None
     last_name: str = None
-    role: str = None
 
 
 class UserOut(UserBase):
@@ -36,7 +35,6 @@ class UserEdit(UserBase):
 
 class User(UserBase):
     id: int
-    role: str
 
     class Config:
         orm_mode = True
@@ -49,4 +47,3 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str = None
-    permissions: str = "user"
